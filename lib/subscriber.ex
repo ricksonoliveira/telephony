@@ -14,12 +14,12 @@ defmodule Subscriber do
 
   ## Example
 
-      iex> Subscriber.create("Rick", "123", "123")
-      iex> Subscriber.create("Ana", "1234", "1234")
+      iex> Subscriber.create("Rick", "123", "123", :prepaid)
+      iex> Subscriber.create("Ana", "1234", "1234", :prepaid)
       iex> Subscriber.prepaid_subscribers
       [
-        %Subscriber{itin: "123", name: "Rick", number: "123", plan: :prepaid},
-        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: :prepaid}
+        %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 10, recharges: []}},
+        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Prepaid{credits: 10, recharges: []}}
       ]
   """
   def prepaid_subscribers, do: read(:prepaid)
@@ -33,8 +33,8 @@ defmodule Subscriber do
       iex> Subscriber.create("Ana", "1234", "1234", :postpaid)
       iex> Subscriber.postpaid_subscribers
       [
-        %Subscriber{itin: "123", name: "Rick", number: "123", plan: :postpaid},
-        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: :postpaid}
+        %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Postpaid{value: nil}},
+        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Postpaid{value: nil}}
       ]
   """
   def postpaid_subscribers, do: read(:postpaid)
@@ -44,12 +44,12 @@ defmodule Subscriber do
 
   ## Example
 
-      iex> Subscriber.create("Rick", "123", "123")
+      iex> Subscriber.create("Rick", "123", "123", :prepaid)
       iex> Subscriber.create("Ana", "1234", "1234", :postpaid)
       iex> Subscriber.subscribers
       [
-        %Subscriber{itin: "123", name: "Rick", number: "123", plan: :prepaid},
-        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: :postpaid}
+        %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 10, recharges: []}},
+        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Postpaid{value: nil}}
       ]
   """
   def subscribers, do: read(:prepaid) ++ read(:postpaid)
@@ -64,9 +64,9 @@ defmodule Subscriber do
 
   ## Example
 
-      iex> Subscriber.create("Rick", "123", "123")
+      iex> Subscriber.create("Rick", "123", "123", :prepaid)
       iex> Subscriber.search_subscriber("123")
-      %Subscriber{itin: "123", name: "Rick", number: "123", plan: :prepaid}
+      %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 10, recharges: []}}
   """
   def search_subscriber(number, plan \\ :all), do: search(number, plan)
   defp search(number, :prepaid), do: filter(prepaid_subscribers(), number)
@@ -85,7 +85,7 @@ defmodule Subscriber do
   - name: subscriber name
   - number: unique number which can return an error
   - itin: subscriber's identification number
-  - plan: optional which in case of not informed will be created with `prepaid` plan
+  - plan: plan type `prepaid` or `postpaid`
 
   ## Additional info
 
@@ -93,19 +93,29 @@ defmodule Subscriber do
 
   ## Example
 
-      iex> Subscriber.create("Rick", "123", "123")
+      iex> Subscriber.create("Rick", "123", "123", :prepaid)
       {:ok, "Hello Rick, your subscription was created successfully!"}
   """
-  def create(name, number, itin, plan \\ :prepaid) do
+  def create(name, number, itin, :prepaid), do: create(name, number, itin, %Prepaid{})
+  def create(name, number, itin, :postpaid), do: create(name, number, itin, %Postpaid{})
+  def create(name, number, itin, plan) do
     case search_subscriber(number) do
       nil ->
-        (read(plan) ++ [%__MODULE__{name: name, number: number, itin: itin, plan: plan}])
+        subscriber = %__MODULE__{name: name, number: number, itin: itin, plan: plan}
+        (read(get_plan(subscriber)) ++ [subscriber])
           |> :erlang.term_to_binary()
-          |> write(plan)
+          |> write(get_plan(subscriber))
 
           {:ok, "Hello #{name}, your subscription was created successfully!"}
       _subscriber ->
         {:error, "Subscriber with this number already exists!"}
+    end
+  end
+
+  defp get_plan(subscriber) do
+    case subscriber.plan.__struct__ == Prepaid do
+      true -> :prepaid
+      false -> :postpaid
     end
   end
 
@@ -118,7 +128,7 @@ defmodule Subscriber do
 
   ## Example
 
-      iex> Subscriber.create("Rick", "123", "123")
+      iex> Subscriber.create("Rick", "123", "123", :prepaid)
       iex> Subscriber.delete("123")
       {:ok, "Subscriber Rick deleted!"}
   """

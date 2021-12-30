@@ -18,14 +18,14 @@ defmodule SubscriberTest do
     end
 
     test "create a prepaid subscriber" do
-      assert Subscriber.create("Rick", "123", "123") ==
+      assert Subscriber.create("Rick", "123", "123", :prepaid) ==
         {:ok, "Hello Rick, your subscription was created successfully!"}
     end
 
     test "should return error that subscriber already exists" do
-      Subscriber.create("Rick", "123", "123")
+      Subscriber.create("Rick", "123", "123", :prepaid)
 
-      assert Subscriber.create("Rick", "123", "123") ==
+      assert Subscriber.create("Rick", "123", "123", :prepaid) ==
         {:error, "Subscriber with this number already exists!"}
     end
   end
@@ -35,18 +35,20 @@ defmodule SubscriberTest do
       Subscriber.create("Rick", "123", "123", :postpaid)
 
       assert Subscriber.search_subscriber("123", :postpaid).name == "Rick"
+      assert Subscriber.search_subscriber("123", :postpaid).plan.__struct__ == Postpaid
     end
 
     test "search prepaid" do
-      Subscriber.create("Rick", "123", "123")
+      Subscriber.create("Rick", "123", "123", :prepaid)
 
       assert Subscriber.search_subscriber("123", :prepaid).name == "Rick"
+      assert Subscriber.search_subscriber("123", :prepaid).plan.__struct__ == Prepaid
     end
   end
 
   describe "Delete subscribers" do
     test "Should delete subscriber" do
-      Subscriber.create("Rick", "123", "123")
+      Subscriber.create("Rick", "123", "123", :prepaid)
 
       assert Subscriber.delete("123") == {:ok, "Subscriber Rick deleted!"}
     end

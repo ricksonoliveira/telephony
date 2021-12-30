@@ -18,7 +18,7 @@ defmodule Telephony do
   - name: subscriber name
   - number: unique number which can return an error
   - itin: subscriber's identification number
-  - plan: optional which in case of not informed will be created with `prepaid` plan
+  - plan: plan type `prepaid` or `postpaid`
 
   ## Additional info
 
