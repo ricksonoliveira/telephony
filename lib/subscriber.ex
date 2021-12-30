@@ -109,6 +109,28 @@ defmodule Subscriber do
     end
   end
 
+  @doc """
+  Delete a subscriber.
+
+  ## Params
+
+  - number: unique subscriber number to be deleted
+
+  ## Example
+
+      iex> Subscriber.create("Rick", "123", "123")
+      iex> Subscriber.delete("123")
+      {:ok, "Subscriber Rick deleted!"}
+  """
+  def delete(number) do
+    subscriber = search_subscriber(number)
+    result = subscribers()
+    |> List.delete(subscriber)
+    |> :erlang.term_to_binary()
+    |> write(subscriber.plan)
+    {result, "Subscriber #{subscriber.name} deleted!"}
+  end
+
   defp write(subscribers, plan) do
     File.write!(@subscribers[plan], subscribers)
   end

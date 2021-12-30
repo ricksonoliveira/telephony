@@ -23,6 +23,7 @@ defmodule Telephony.MixProject do
     [
       {:ex_doc, "~> 0.19.3", only: [:dev]},
       {:earmark, "~> 1.3", only: [:dev]},
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
 end

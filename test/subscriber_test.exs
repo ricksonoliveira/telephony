@@ -43,4 +43,12 @@ defmodule SubscriberTest do
       assert Subscriber.search_subscriber("123", :prepaid).name == "Rick"
     end
   end
+
+  describe "Delete subscribers" do
+    test "Should delete subscriber" do
+      Subscriber.create("Rick", "123", "123")
+
+      assert Subscriber.delete("123") == {:ok, "Subscriber Rick deleted!"}
+    end
+  end
 end
