@@ -17,7 +17,14 @@ defmodule PrepaidTest do
       Subscriber.create("Rick", "123", "123", :prepaid)
 
       assert Prepaid.make_call("123", DateTime.utc_now(), 3) ==
-        {:ok, "This call costed 4.35"}
+        {:ok, "This call costed 4.35, you have 5.65 credits."}
+    end
+
+    test "Make a long call that will spend all credits" do
+      Subscriber.create("Rick", "123", "123", :prepaid)
+
+      assert Prepaid.make_call("123", DateTime.utc_now(), 10) ==
+        {:error, "You do not have enough credits to complete the call. Please recharge."}
     end
   end
 end

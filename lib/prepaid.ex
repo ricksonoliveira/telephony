@@ -1,6 +1,7 @@
 defmodule Prepaid do
 
   defstruct credits: 10, recharges: []
+
   @minute_price 1.45
 
   @doc """
@@ -11,8 +12,14 @@ defmodule Prepaid do
     cost = @minute_price * duration
 
     cond do
-      cost <= 10 ->
-        {:ok, "This call costed #{cost}"}
+      cost <= subscriber.plan.credits ->
+        plan = subscriber.plan
+        plan = %__MODULE__{plan | credits: plan.credits - cost}
+
+        %Subscriber{subscriber | plan: plan}
+        |> Call.register(date, duration)
+
+        {:ok, "This call costed #{cost}, you have #{plan.credits} credits."}
       true ->
         {:error, "You do not have enough credits to complete the call. Please recharge."}
     end

@@ -5,7 +5,7 @@ defmodule Subscriber do
     The most used function is `create/4`
   """
 
-  defstruct name: nil, number: nil, itin: nil, plan: nil
+  defstruct name: nil, number: nil, itin: nil, plan: nil, calls: []
 
   @subscribers %{:prepaid => "pre.txt", :postpaid => "post.txt"}
 
@@ -112,6 +112,22 @@ defmodule Subscriber do
     end
   end
 
+  def update(number, subscriber) do
+    # Since we are dealing with files and not a real database,
+    # we cannot just update the item in the file, we have to delete it first.
+    {old_subscriber, new_list} = delete_item(number)
+
+    case subscriber.plan.__struct__ == old_subscriber.plan.__struct__ do
+      true ->
+        (new_list ++ [subscriber])
+        |> :erlang.term_to_binary()
+        |> write(get_plan(subscriber))
+
+      false ->
+        {:error, "Subscriber cannot alter plan."}
+    end
+  end
+
   defp get_plan(subscriber) do
     case subscriber.plan.__struct__ == Prepaid do
       true -> :prepaid
@@ -133,12 +149,21 @@ defmodule Subscriber do
       {:ok, "Subscriber Rick deleted!"}
   """
   def delete(number) do
-    subscriber = search_subscriber(number)
-    result = subscribers()
-    |> List.delete(subscriber)
+    {subscriber, new_list} = delete_item(number)
+
+    new_list
     |> :erlang.term_to_binary()
     |> write(subscriber.plan)
-    {result, "Subscriber #{subscriber.name} deleted!"}
+
+    {:ok, "Subscriber #{subscriber.name} deleted!"}
+  end
+
+  def delete_item(number) do
+    subscriber = search_subscriber(number)
+
+    new_list = read(get_plan(subscriber))
+    |> List.delete(subscriber)
+    {subscriber, new_list}
   end
 
   defp write(subscribers, plan) do
