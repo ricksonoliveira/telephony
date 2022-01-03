@@ -18,8 +18,8 @@ defmodule Subscriber do
       iex> Subscriber.create("Ana", "1234", "1234", :prepaid)
       iex> Subscriber.prepaid_subscribers
       [
-        %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 10, recharges: []}},
-        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Prepaid{credits: 10, recharges: []}}
+        %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 0, recharges: []}},
+        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Prepaid{credits: 0, recharges: []}}
       ]
   """
   def prepaid_subscribers, do: read(:prepaid)
@@ -48,7 +48,7 @@ defmodule Subscriber do
       iex> Subscriber.create("Ana", "1234", "1234", :postpaid)
       iex> Subscriber.subscribers
       [
-        %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 10, recharges: []}},
+        %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 0, recharges: []}},
         %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Postpaid{value: nil}}
       ]
   """
@@ -66,7 +66,7 @@ defmodule Subscriber do
 
       iex> Subscriber.create("Rick", "123", "123", :prepaid)
       iex> Subscriber.search_subscriber("123")
-      %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 10, recharges: []}}
+      %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 0, recharges: []}}
   """
   def search_subscriber(number, plan \\ :all), do: search(number, plan)
   defp search(number, :prepaid), do: filter(prepaid_subscribers(), number)

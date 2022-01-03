@@ -1,6 +1,6 @@
 defmodule Prepaid do
 
-  defstruct credits: 10, recharges: []
+  defstruct credits: 0, recharges: []
 
   @minute_price 1.45
 
