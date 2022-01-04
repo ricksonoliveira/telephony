@@ -11,6 +11,10 @@ defmodule RechargeTest do
     end)
   end
 
+  test "should test structure" do
+    assert %Recharge{date: DateTime.utc_now(), value: 10}.value == 10
+  end
+
   test "Should make a recharge" do
     Subscriber.create("Rick", "123", "123", :prepaid)
 

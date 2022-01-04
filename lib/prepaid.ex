@@ -24,4 +24,8 @@ defmodule Prepaid do
         {:error, "You do not have enough credits to complete the call. Please recharge."}
     end
   end
+
+  def print_bill(month, year, number) do
+    Bills.print(month, year, number, :prepaid)
+  end
 end

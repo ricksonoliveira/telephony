@@ -49,7 +49,7 @@ defmodule SubscriberTest do
   describe "Delete subscribers" do
     test "Should delete subscriber" do
       Subscriber.create("Rick", "123", "123", :prepaid)
-
+      Subscriber.create("Ana", "222", "87654", :prepaid)
       assert Subscriber.delete("123") == {:ok, "Subscriber Rick deleted!"}
     end
   end

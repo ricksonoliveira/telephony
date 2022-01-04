@@ -8,7 +8,6 @@ defmodule Call do
       | calls: subscriber.calls ++ [%__MODULE__{date: date, duration: duration}]
     }
 
-    subscriber = Subscriber.update(subscriber.number, updated_subscriber)
-    IO.inspect(subscriber)
+    Subscriber.update(subscriber.number, updated_subscriber)
   end
 end

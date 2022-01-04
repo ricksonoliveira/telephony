@@ -33,8 +33,8 @@ defmodule Subscriber do
       iex> Subscriber.create("Ana", "1234", "1234", :postpaid)
       iex> Subscriber.postpaid_subscribers
       [
-        %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Postpaid{value: nil}},
-        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Postpaid{value: nil}}
+        %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Postpaid{value: 0}},
+        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Postpaid{value: 0}}
       ]
   """
   def postpaid_subscribers, do: read(:postpaid)
@@ -49,7 +49,7 @@ defmodule Subscriber do
       iex> Subscriber.subscribers
       [
         %Subscriber{itin: "123", name: "Rick", number: "123", plan: %Prepaid{credits: 0, recharges: []}},
-        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Postpaid{value: nil}}
+        %Subscriber{itin: "1234", name: "Ana", number: "1234", plan: %Postpaid{value: 0}}
       ]
   """
   def subscribers, do: read(:prepaid) ++ read(:postpaid)
@@ -112,6 +112,14 @@ defmodule Subscriber do
     end
   end
 
+  @doc """
+  Function to update subscriber, it is mandatory to keep the plan
+
+  ##  Params
+
+  - number: unique number, in case it already exists an error will be returnerd
+  - subscriber: mandatory to pass the subscriber
+  """
   def update(number, subscriber) do
     # Since we are dealing with files and not a real database,
     # we cannot just update the item in the file, we have to delete it first.
@@ -158,7 +166,7 @@ defmodule Subscriber do
     {:ok, "Subscriber #{subscriber.name} deleted!"}
   end
 
-  def delete_item(number) do
+  defp delete_item(number) do
     subscriber = search_subscriber(number)
 
     new_list = read(get_plan(subscriber))
